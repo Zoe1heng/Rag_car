@@ -1,0 +1,23 @@
+.env
+__pycache__/
+*.pyc
+.DS_Store
+*.faiss
+*.pkl
+
+# 课程资料, 不是自己的产出
+项目题库-项目实战1.md
+简历模版-项目实战1.md
+
+# 预训练模型权重 (体积大, 且是第三方重新分发, README 里写明下载方式)
+pre_train_model/
+
+# 生成的缓存/产物, 可重新跑出来
+faiss_cache/
+all_text.txt
+
+# 有版权的第三方原始文档, 不做公开分发
+data/train_a.pdf
+
+# 课程提供的说明文档, 不做分发
+README.md
