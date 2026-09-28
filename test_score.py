@@ -59,7 +59,7 @@ if __name__ == "__main__":
     print("Read gold from %s" % gold_path)
 
     # 预测文件路径
-    predict_path = sys.argv[1] if len(sys.argv) > 1 else "./data/result.json"
+    predict_path = sys.argv[1] if len(sys.argv) > 1 else "./data/result_deepseek.json"
     print("Read predict file from %s" % predict_path)
 
     # 四种答案的对比: 1=向量+BM25合并, 2=仅BM25, 3=仅向量, 4=多路召回+重排
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     print("="*100)
 
     # 结果文件路径
-    metric_path = "./data/metrics.json" 
+    metric_path = "./data/metrics_deepseek.json" 
     results_info = json.dumps(results, ensure_ascii=False, indent=2)
     with open(metric_path, "w") as fd:
         fd.write(results_info)

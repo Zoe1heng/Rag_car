@@ -2,9 +2,9 @@
 # coding: utf-8
 
 
-from langchain.schema import Document
-from langchain.vectorstores import Chroma,FAISS
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+from langchain_core.documents import Document
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
 from pdf_parse import DataProcess
 from config import EMBEDDING_DEVICE
 import hashlib

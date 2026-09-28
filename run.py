@@ -6,26 +6,14 @@ import jieba
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-from langchain.schema import Document
-from langchain.vectorstores import Chroma,FAISS
-from langchain import PromptTemplate, LLMChain
-from langchain.chains import RetrievalQA
 import time
 import re
 
-from api_llm import ChatLLM
+from api_llm import get_llm, provider_of, with_system
 from rerank_model import reRankLLM
 from faiss_retriever import FaissRetriever
 from bm25_retriever import BM25
 from pdf_parse import DataProcess
-
-# 获取Langchain的工具链 
-def get_qa_chain(llm, vector_store, prompt_template):
-
-    prompt = PromptTemplate(template=prompt_template,
-                            input_variables=["context", "question"])
-
-    return RetrievalQA.from_llm(llm=llm, retriever=vector_store.as_retriever(search_kwargs={"k": 10}), prompt=prompt)
 
 # 构造提示，根据merged faiss和bm25的召回结果返回答案
 def get_emb_bm25_merge(faiss_context, bm25_context, query):
@@ -69,13 +57,6 @@ def get_rerank(emb_ans, query):
                                 {question}""".format(emb_ans=emb_ans, question = query)
     return prompt_template
 
-
-def question(text, llm, vector_store, prompt_template):
-
-    chain = get_qa_chain(llm, vector_store, prompt_template)
-
-    response = chain({"query": text})
-    return response
 
 def reRank(rerank, top_k, query, bm25_ans, faiss_ans):
     items = []
@@ -125,8 +106,8 @@ if __name__ == "__main__":
     print("bm25 load ok")
 
     # LLM大模型
-    llm = ChatLLM()
-    print(f"llm api ok: {llm.provider} / {llm.model}")
+    llm = get_llm()
+    print(f"llm api ok: {provider_of(llm)} / {llm.model_name}")
 
     # reRank模型
     rerank = reRankLLM(bge_reranker_large)
@@ -189,7 +170,7 @@ if __name__ == "__main__":
             batch_input.append(emb_inputs)
             batch_input.append(rerank_inputs)
             # 执行batch推理
-            batch_output = llm.infer(batch_input)
+            batch_output = [message.text for message in llm.batch([with_system(p) for p in batch_input])]
             line["answer_1"] = batch_output[0] # 合并两路召回的结果
             line["answer_2"] = batch_output[1] # bm召回的结果
             line["answer_3"] = batch_output[2] # 向量召回的结果
@@ -204,7 +185,7 @@ if __name__ == "__main__":
                 line["answer_5"] = str(faiss_min_score)
 
         # 保存结果，生成submission文件
-        result_path = base + f"/data/result_{llm.provider}.json"
+        result_path = base + f"/data/result_{provider_of(llm)}.json"
         json.dump(jdata, open(result_path, "w", encoding='utf-8'), ensure_ascii=False, indent=2)
         print("result saved to " + result_path)
         end = time.time()

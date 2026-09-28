@@ -2,8 +2,8 @@
 # coding: utf-8
 
 
-from langchain.retrievers import BM25Retriever
-from langchain.schema import Document
+from langchain_community.retrievers import BM25Retriever
+from langchain_core.documents import Document
 from pdf_parse import DataProcess
 import jieba
 
@@ -36,7 +36,7 @@ class BM25(object):
     def GetBM25TopK(self, query, topk):
         self.retriever.k = topk
         query = " ".join(jieba.cut_for_search(query))
-        ans_docs = self.retriever.get_relevant_documents(query)
+        ans_docs = self.retriever.invoke(query)
         ans = []
         for line in ans_docs:
             ans.append(self.full_documents[line.metadata["id"]])
